@@ -1,0 +1,90 @@
+<template>
+    <lightning-card title="Field Service Dispatcher" icon-name="standard:service_appointment">
+        <div slot="actions" class="slds-grid slds-grid_vertical-align-center">
+            <div class="slds-m-right_medium" style="width: 200px;">
+                <lightning-combobox
+                    name="territoryFilter"
+                    label="Filter by Territory"
+                    placeholder="All Territories"
+                    value={selectedTerritoryId}
+                    options={territoryOptions}
+                    onchange={handleFilterChange}
+                    variant="label-hidden">
+                </lightning-combobox>
+            </div>
+
+            <lightning-button 
+                label="Run Auto-Assign" 
+                variant="brand" 
+                onclick={handleAutoAssign} 
+                disabled={isLoading}
+                icon-name="utility:automate">
+            </lightning-button>
+            <lightning-button 
+                label="Refresh Data" 
+                icon-name="utility:refresh" 
+                onclick={handleRefresh} 
+                class="slds-var-m-left_x-small"
+                disabled={isLoading}>
+            </lightning-button>
+        </div>
+
+        <div class="slds-p-around_medium slds-is-relative" style="min-height: 200px;">
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Scheduling..." size="medium"></lightning-spinner>
+            </template>
+
+            <div class="slds-grid slds-wrap">
+                <template for:each={appointments} for:item="sa">
+                    <div key={sa.Id} class="slds-p-around_small slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3">
+                        <div class="slds-box slds-box_x-small slds-border_left slds-border_thick" style={sa.cardStyle}>
+                            <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_small">
+                                <lightning-icon icon-name={sa.iconName} size="small" class="slds-m-right_small"></lightning-icon>
+                                <span class="slds-text-heading_small slds-truncate">
+                                    <button class="slds-button slds-button_reset slds-text-link"  onclick={handleNavigate} data-id={sa.Id}>
+                                        <strong>{sa.AppointmentNumber}</strong>
+                                    </button>
+                                </span>
+                            </div>
+
+                            <div class="slds-p-horizontal_small">
+                                <p class="slds-text-body_regular slds-truncate slds-m-bottom_xx-small">
+                                    Territory: <strong>{sa.TerritoryName}</strong>
+                                </p>
+                                <p class="slds-text-body_regular slds-m-bottom_xx-small">
+                                    Status: <strong>{sa.Status}</strong>
+                                </p>
+                                <p class="slds-text-body_regular slds-m-bottom_xx-small">
+                                    Technician: <strong>{sa.ResourceName}</strong>
+                                </p>
+                                
+                                <template if:true={sa.SchedStartTime}>
+                                    <p class="slds-text-body_small">
+                                        Scheduled Slot: 
+                                        <strong>
+                                            <lightning-formatted-date-time value={sa.SchedStartTime} hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                            - 
+                                            <lightning-formatted-date-time value={sa.SchedEndTime} hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                        </strong>
+                                    </p>
+                                    <p class="slds-text-body_small slds-text-color_weak">
+                                        <lightning-formatted-date-time value={sa.SchedStartTime} month="short" day="2-digit" year="numeric"></lightning-formatted-date-time>
+                                    </p>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            
+            <template if:false={hasAppointments}>
+                <div class="slds-illustration slds-illustration_small slds-var-m-top_large">
+                    <div class="slds-text-longform slds-text-align_center">
+                        <h3 class="slds-text-heading_medium">No Recent Appointments</h3>
+                        <p class="slds-text-body_regular">All appointments for this territory are processed!</p>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>
